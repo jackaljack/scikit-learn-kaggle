@@ -39,7 +39,16 @@ R = np.corrcoef(X_train.transpose())
 plt.figure(2)
 pcolor(R)
 colorbar()
+plt.title("correlation matrix")
+plt.savefig("correlation_matrix.png")
 show()
+
+### center the variables before performing PCA
+# center to the mean, but DO NOT component wise scale to unit variance
+# by centering the variables, principal components remain the same,
+# by standardizing the variables, principal components change
+X_train = pp.scale(X_train, with_mean=True, with_std=False)
+X_test = pp.scale(X_test, with_mean=True, with_std=False)
 
 ### dimensionality reduction using PCA
 # since data is uncorrelated and with variance almost equal to 1,
@@ -58,13 +67,7 @@ plt.axis([1, 40, 0, 0.3])
 plt.grid(True)
 plt.xlabel("principal components"), plt.ylabel("variance explained")
 plt.title("scree plot")
-
-### center the variables before performing PCA
-# center to the mean, but DO NOT component wise scale to unit variance
-# by centering the variables, principal components remain the same,
-# by standardizing the variables, principal components change
-X_train = pp.scale(X_train, with_mean=True, with_std=False)
-X_test = pp.scale(X_test, with_mean=True, with_std=False)
+plt.savefig("scree_plot.png")
 
 # from the scree plot we choose to pick the first 12 principal components
 pca12 = PCA(n_components=12, whiten=True) 
@@ -104,14 +107,14 @@ skf = cv.StratifiedKFold(y, n_folds=3)
 # Grid Search, first pass: coarse tuning of the parameters C and gamma
 # C is a regularization parameter
 # large C makes constraints hard to ignore -> narrow separation margin
-C_range = 10.0 ** np.arange(5, 10) # 5, 10
+C_range = 10.0 ** np.arange(6, 8) # 5, 10 is too low
 # gamma is th width of the Radial Basis Function (RBF) kernel.
 # gamma controls the shape of the separating hyperplane
-gamma_range = 10.0 ** np.arange(-5, 0) # -5, 0
+gamma_range = 10.0 ** np.arange(-3, 0) # -5, 0 is too low
 # Dictionary with parameters names as keys and lists of parameter settings to try as values
 params = dict(gamma = gamma_range, C = C_range)
 classifier = svm.SVC(kernel='rbf')
-# GridSearchCV parameters of the classifier used to predict is optimized by cross-validation
+# SVM classifier optimized through cross validation
 clf = grid_search.GridSearchCV(classifier, param_grid = params, cv = skf)
 # fit the model after the reduced dimensionality performed by PCA
 clf.fit(X_pca_train, y)
@@ -126,13 +129,12 @@ clf = grid_search.GridSearchCV(classifier, param_grid = params, cv = skf)
 clf.fit(X_pca_train, y)
 print("The best classifier is: ", clf.best_estimator_)
 
-# Estimate score of the classifier
+### Estimate score of the classifier
 scores = cv.cross_val_score(clf.best_estimator_, X_pca_train, y, cv=10)
 print('Estimated score: %0.5f (+/- %0.5f)' % (scores.mean(), scores.std() / 2))
 
-# Predict and save
+### Predict and save
 result = clf.best_estimator_.predict(X_pca_test)
-np.savetxt("result.csv", result, fmt="%d")
 
 f = open('result.csv','w')
 # headers in the CSV file
