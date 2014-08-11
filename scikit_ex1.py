@@ -133,3 +133,13 @@ print('Estimated score: %0.5f (+/- %0.5f)' % (scores.mean(), scores.std() / 2))
 # Predict and save
 result = clf.best_estimator_.predict(X_pca_test)
 np.savetxt("result.csv", result, fmt="%d")
+
+f = open('result.csv','w')
+# headers in the CSV file
+f.write('Id,Solution\n') 
+id = 1
+for x in result:
+    # id, label are numerical values (%d)
+    f.write('%d,%d\n' % (id,x))
+    id += 1
+f.close()
