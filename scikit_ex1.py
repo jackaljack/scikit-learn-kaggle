@@ -13,6 +13,7 @@ from sklearn import preprocessing as pp
 from sklearn import cross_validation as cv
 from sklearn import grid_search
 import matplotlib.pyplot as plt
+from pylab import pcolor, colorbar
 
 ### import the data
 # test set. 40 features, 9000 samples
@@ -33,8 +34,11 @@ pd.tools.plotting.scatter_matrix(df, alpha=0.3, figsize=(8, 8), diagonal='hist')
 # http://www.visiondummy.com/2014/04/curse-dimensionality-affect-classification/
 # variables have almost the same variance, so there is no need of standardizing them before PCA.
 
-# the correlation between 2 variables is very small
-np.corrcoef(X_train[:,0], X_train[:,1])
+# correlation matrix (correlation between 2 variables is very small)
+R = np.corrcoef(X_train.transpose())
+plt.figure(2)
+pcolor(R)
+colorbar()
 
 ### dimensionality reduction using PCA (with whitening)
 # variance explained by all the 40 features (with whitening)
@@ -46,16 +50,17 @@ print(pca40.explained_variance_ratio_)
 
 # plot all the principal components with their relative explained variance
 features = [x for x in range(1,41)]
-plt.figure(2)
+plt.figure(3)
 # percentage of variance explained by each of the selected components.
 # The sum of explained variances is equal to 1.0
-plt.plot(features, pca40.explained_variance_ratio_, 'g--', marker='o')
+plt.plot(features, pca40.explained_variance_ratio_, 'r--', marker='o')
 plt.axis([1, 40, 0, 0.3])
 plt.grid(True)
 plt.xlabel("principal components"), plt.ylabel("variance explained")
 plt.title("scree plot")
 
-# Scale data before PCA: center to the mean and component wise scale to unit variance
+### standardize the variables before performing PCA
+# center to the mean and component wise scale to unit variance
 X_train = pp.scale(X_train)
 X_test = pp.scale(X_test)
 
@@ -81,7 +86,8 @@ def qq_plot(x):
     from scipy.stats import probplot
     plt.figure()
     probplot(x, dist="norm", plot=plt)
-    
+
+#• kernel density plot and qq plot of the first principal component    
 kde_plot(X_pca_train[:, 0])
 qq_plot(X_pca_train[:,0])
 
