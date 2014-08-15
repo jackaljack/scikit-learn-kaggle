@@ -100,7 +100,7 @@ qq_plot(X_pca_train[:,0])
 # Stratified K-fold CV: all the folds have size trunc(n_samples / n_folds).
 # Each fold contains roughly the same proportions of the two types of class labels.
 # Provides train/test indices to split data in train test sets
-skf = cv.StratifiedKFold(y, n_folds=3)
+skf = cv.StratifiedKFold(y, n_folds=3) # 6 is a bit worse
 
 ### Hyperparameter optimization using grid-search
 # find C and gamma with a "grid-search" using cross validation
